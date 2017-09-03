@@ -1,1 +1,8 @@
 D:\GitHub\GameSandBox\GameSandBox\GameSandBox\bin\Debug\GameSandBox.exe.config
+D:\GitHub\GameSandBox\GameSandBox\GameSandBox\bin\Debug\GameSandBox.exe
+D:\GitHub\GameSandBox\GameSandBox\GameSandBox\bin\Debug\GameSandBox.pdb
+D:\GitHub\GameSandBox\GameSandBox\GameSandBox\bin\Debug\OpenTK.dll
+D:\GitHub\GameSandBox\GameSandBox\GameSandBox\bin\Debug\OpenTK.xml
+D:\GitHub\GameSandBox\GameSandBox\GameSandBox\obj\Debug\GameSandBox.csprojResolveAssemblyReference.cache
+D:\GitHub\GameSandBox\GameSandBox\GameSandBox\obj\Debug\GameSandBox.exe
+D:\GitHub\GameSandBox\GameSandBox\GameSandBox\obj\Debug\GameSandBox.pdb
