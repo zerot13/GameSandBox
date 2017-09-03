@@ -13,5 +13,12 @@ namespace GameSandBox
         public int ID { get { return id; } }
         public int Width { get { return width; } }
         public int Height { get { return height; } }
+
+        public Texture2D(int id, int Width, int Height)
+        {
+            this.id = id;
+            width = Width;
+            height = Height;
+        }
     }
 }

@@ -14,6 +14,8 @@ namespace GameSandBox
     {
         private GameWindow _window;
 
+        Texture2D texture;
+
         public Game(GameWindow w)
         {
             _window = w;
@@ -30,6 +32,12 @@ namespace GameSandBox
 
             GL.Enable(EnableCap.DepthTest);
             GL.DepthFunc(DepthFunction.Lequal);
+
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.AlphaTest);
+            GL.AlphaFunc(AlphaFunction.Gequal, 0.6f);
+
+            texture = ContentPipe.LoadTexture("Content/penguin.png");
         }
 
         private void Window_UpdateFrame(object sender, FrameEventArgs e)
@@ -40,27 +48,74 @@ namespace GameSandBox
 
         private void Window_RenderFrame(object sender, FrameEventArgs e)
         {
-            //Console.WriteLine("Render");
             GL.ClearColor(Color.CornflowerBlue);
             GL.ClearDepth(1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            GL.Begin(PrimitiveType.Triangles);
-            GL.Color3(Color.Green);
-            GL.Vertex3(-1, 0, .5f);
-            GL.Color3(Color.OrangeRed);
-            GL.Vertex3(1, 0, .5f);
-            GL.Color3(Color.Yellow);
-            GL.Vertex3(0, 1, .5f);
+            Matrix4 projMatrix = Matrix4.CreateOrthographicOffCenter(0, _window.Width, _window.Height, 0, 0, 1);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref projMatrix);
 
-            GL.Color4(1f, 1f, 1f, .5f);
-            GL.Vertex3(-0.25f, 1f, .8f);
-            GL.Vertex3(1f, -0.25f, .1f);
-            GL.Vertex3(-0.25f, -0.25f, .1f);
+            Matrix4 modelViewMatrix = Matrix4.CreateScale(.5f, .5f, 1f) * Matrix4.CreateRotationZ(0f) * Matrix4.CreateTranslation(0f, 0f, 0f);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref modelViewMatrix);
+            DrawPenguin();
 
-            GL.End();
+            modelViewMatrix = Matrix4.CreateScale(.6f, .4f, 1f) * Matrix4.CreateRotationZ(0f) * Matrix4.CreateTranslation(300f, 0f, 0f);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref modelViewMatrix);
+            DrawPenguin();
+
+            modelViewMatrix = Matrix4.CreateScale(.5f, .5f, 1f) * Matrix4.CreateRotationZ(0.4f) * Matrix4.CreateTranslation(200f, 250f, 0f);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref modelViewMatrix);
+            DrawPenguin();
+
+            modelViewMatrix = Matrix4.CreateScale(1f, 1f, 1f) * Matrix4.CreateRotationZ(0.4f) * Matrix4.CreateTranslation(0f, 0f, -0.1f);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref modelViewMatrix);
+            DrawPenguin();
 
             _window.SwapBuffers();
+        }
+
+        private void DrawPenguin()
+        {
+            GL.BindTexture(TextureTarget.Texture2D, texture.ID);
+
+            GL.Begin(PrimitiveType.Triangles);
+
+            GL.Color4(1f, 1f, 1f, 1f);
+            GL.TexCoord2(0, 0);
+            GL.Vertex2(0, 0);
+            GL.TexCoord2(1, 1);
+            GL.Vertex2(500, 525);
+            GL.TexCoord2(0, 1);
+            GL.Vertex2(0, 525);
+
+            GL.TexCoord2(0, 0);
+            GL.Vertex2(0, 0);
+            GL.TexCoord2(1, 0);
+            GL.Vertex2(500, 0);
+            GL.TexCoord2(1, 1);
+            GL.Vertex2(500, 525);
+
+            GL.End();
+        }
+
+        private void DrawSquare()
+        {
+            //GL.Begin(PrimitiveType.Quads);
+            //GL.Color4(1f, 1f, 1f, 1f);
+            //GL.TexCoord2(0, 0);
+            //GL.Vertex2(1, 1);
+            //GL.TexCoord2(1, 0);
+            //GL.Vertex2(0, 1);
+            //GL.TexCoord2(1, 1);
+            //GL.Vertex2(0, 0);
+            //GL.TexCoord2(0, 1);
+            //GL.Vertex2(1, 0);
+            //GL.End();
         }
     }
 }
