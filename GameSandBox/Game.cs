@@ -13,8 +13,10 @@ namespace GameSandBox
     class Game
     {
         private GameWindow _window;
-
         Texture2D texture;
+        int VBO;
+        Vertex[] vertices;
+
 
         public Game(GameWindow w)
         {
@@ -70,22 +72,43 @@ namespace GameSandBox
             GL.AlphaFunc(AlphaFunction.Gequal, 0.6f);
 
             texture = ContentPipe.LoadTexture("Content/penguin.png");
+
+            //Vector2[] vertices = new Vector2[6] {
+            //    new Vector2(0, 0),
+            //    new Vector2(100, 0),
+            //    new Vector2(100, 100),
+            //    new Vector2(0, 0),
+            //    new Vector2(100, 100),
+            //    new Vector2(0, 100)
+            //};
+            vertices = new Vertex[6] {
+                new Vertex(new Vector2(0, 0), new Vector2(0, 0), Color.Red),
+                new Vertex(new Vector2(100, 0), new Vector2(1, 0), Color.Yellow),
+                new Vertex(new Vector2(100, 100), new Vector2(1, 1), Color.Blue),
+                new Vertex(new Vector2(0, 0), new Vector2(0, 0), Color.Red),
+                new Vertex(new Vector2(100, 100), new Vector2(1, 1), Color.Blue),
+                new Vertex(new Vector2(0, 100), new Vector2(0, 1), Color.Green)
+            };
+            VBO = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+
+            GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vertices.Length), vertices, BufferUsageHint.StaticDraw);
         }
 
         KeyboardState prevState;
         private void Window_UpdateFrame(object sender, FrameEventArgs e)
         {
-            KeyboardState keyState = Keyboard.GetState();
+            //KeyboardState keyState = Keyboard.GetState();
 
-            if (keyState.IsKeyDown(Key.Enter) && prevState.IsKeyUp(Key.Enter))
-            {
-                Console.WriteLine("Enter!");
-            }
-            prevState = keyState;
+            //if (keyState.IsKeyDown(Key.Enter) && prevState.IsKeyUp(Key.Enter))
+            //{
+            //    Console.WriteLine("Enter!");
+            //}
+            //prevState = keyState;
 
             //Console.WriteLine("MousePos: {0}, {1}", _window.Mouse.X, _window.Mouse.Y);
-            MouseState mState = Mouse.GetCursorState();
-            Point mPos = _window.PointToClient(new Point(mState.X, mState.Y));
+            //MouseState mState = Mouse.GetCursorState();
+            //Point mPos = _window.PointToClient(new Point(mState.X, mState.Y));
             //Console.WriteLine("MousePos: {0}, {1}", mPos.X, mPos.Y);
         }
 
@@ -95,29 +118,24 @@ namespace GameSandBox
             GL.ClearDepth(1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            Matrix4 projMatrix = Matrix4.CreateOrthographicOffCenter(0, _window.Width, _window.Height, 0, 0, 1);
+            Matrix4 projMatrix = Matrix4.CreateOrthographicOffCenter(0, _window.ClientSize.Width, _window.ClientSize.Height, 0, 0, 1);
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadMatrix(ref projMatrix);
-
-            Matrix4 modelViewMatrix = Matrix4.CreateScale(.5f, .5f, 1f) * Matrix4.CreateRotationZ(0f) * Matrix4.CreateTranslation(0f, 0f, 0f);
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref modelViewMatrix);
-            DrawPenguin();
+            GL.LoadIdentity();
 
-            modelViewMatrix = Matrix4.CreateScale(.6f, .4f, 1f) * Matrix4.CreateRotationZ(0f) * Matrix4.CreateTranslation(300f, 0f, 0f);
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref modelViewMatrix);
-            DrawPenguin();
+            GL.BindTexture(TextureTarget.Texture2D, texture.ID);
 
-            modelViewMatrix = Matrix4.CreateScale(.5f, .5f, 1f) * Matrix4.CreateRotationZ(0.4f) * Matrix4.CreateTranslation(200f, 250f, 0f);
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref modelViewMatrix);
-            DrawPenguin();
-
-            modelViewMatrix = Matrix4.CreateScale(1f, 1f, 1f) * Matrix4.CreateRotationZ(0.4f) * Matrix4.CreateTranslation(0f, 0f, -0.1f);
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref modelViewMatrix);
-            DrawPenguin();
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.EnableClientState(ArrayCap.TextureCoordArray);   
+            GL.EnableClientState(ArrayCap.ColorArray);
+            GL.VertexPointer(   2, VertexPointerType.Float,      Vertex.SizeInBytes,   0);
+            GL.TexCoordPointer( 2, TexCoordPointerType.Float,    Vertex.SizeInBytes,    Vector2.SizeInBytes);
+            GL.ColorPointer(    4, ColorPointerType.Float,       Vertex.SizeInBytes,    Vector2.SizeInBytes * 2);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+            //GL.TexCoord2(0.5f, 0.5f);
+            //GL.Color4(Color.Red);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length);
 
             _window.SwapBuffers();
         }
@@ -159,6 +177,31 @@ namespace GameSandBox
             //GL.TexCoord2(0, 1);
             //GL.Vertex2(1, 0);
             //GL.End();
+        }
+
+        private void MultiPenguin()
+        {
+            //Matrix4 modelViewMatrix = Matrix4.CreateScale(.5f, .5f, 1f) * Matrix4.CreateRotationZ(0f) * Matrix4.CreateTranslation(0f, 0f, 0f);
+            //GL.MatrixMode(MatrixMode.Modelview);
+            //GL.LoadMatrix(ref modelViewMatrix);
+            //DrawPenguin();
+
+            //modelViewMatrix = Matrix4.CreateScale(.6f, .4f, 1f) * Matrix4.CreateRotationZ(0f) * Matrix4.CreateTranslation(300f, 0f, 0f);
+            //GL.MatrixMode(MatrixMode.Modelview);
+            //GL.LoadMatrix(ref modelViewMatrix);
+            //DrawPenguin();
+            //GL.LoadIdentity();
+
+            //modelViewMatrix = Matrix4.CreateScale(.5f, .5f, 1f) * Matrix4.CreateRotationZ(0.4f) * Matrix4.CreateTranslation(200f, 250f, 0f);
+            //GL.MatrixMode(MatrixMode.Modelview);
+            //GL.LoadMatrix(ref modelViewMatrix);
+            //DrawPenguin();
+
+            //modelViewMatrix = Matrix4.CreateScale(1f, 1f, 1f) * Matrix4.CreateRotationZ(0.4f) * Matrix4.CreateTranslation(0f, 0f, -0.1f);
+            //GL.MatrixMode(MatrixMode.Modelview);
+            //GL.LoadMatrix(ref modelViewMatrix);
+            //DrawPenguin();
+            //GL.BindTexture(TextureTarget.Texture2D, texture.ID);
         }
     }
 }
