@@ -14,9 +14,12 @@ namespace GameSandBox
     {
         private GameWindow _window;
         Texture2D texture;
-        int VBO;
+        int VBO, IBO;
         Vertex[] vertices;
-
+        uint[] indices;
+        List<Vertex> vList;
+        List<uint> uList;
+        int sCount = 0;
 
         public Game(GameWindow w)
         {
@@ -73,29 +76,30 @@ namespace GameSandBox
 
             texture = ContentPipe.LoadTexture("Content/penguin.png");
 
-            //Vector2[] vertices = new Vector2[6] {
-            //    new Vector2(0, 0),
-            //    new Vector2(100, 0),
-            //    new Vector2(100, 100),
-            //    new Vector2(0, 0),
-            //    new Vector2(100, 100),
-            //    new Vector2(0, 100)
+            //vertices = new Vertex[4] {
+            //    new Vertex(new Vector2(0, 0), new Vector2(0, 0), Color.Red),
+            //    new Vertex(new Vector2(100, 0), new Vector2(1, 0), Color.Yellow),
+            //    new Vertex(new Vector2(100, 100), new Vector2(1, 1), Color.Blue),
+            //    //new Vertex(new Vector2(0, 0), new Vector2(0, 0), Color.Red),
+            //    //new Vertex(new Vector2(100, 100), new Vector2(1, 1), Color.Blue),
+            //    new Vertex(new Vector2(0, 100), new Vector2(0, 1), Color.Green)
             //};
-            vertices = new Vertex[6] {
-                new Vertex(new Vector2(0, 0), new Vector2(0, 0), Color.Red),
-                new Vertex(new Vector2(100, 0), new Vector2(1, 0), Color.Yellow),
-                new Vertex(new Vector2(100, 100), new Vector2(1, 1), Color.Blue),
-                new Vertex(new Vector2(0, 0), new Vector2(0, 0), Color.Red),
-                new Vertex(new Vector2(100, 100), new Vector2(1, 1), Color.Blue),
-                new Vertex(new Vector2(0, 100), new Vector2(0, 1), Color.Green)
-            };
             VBO = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
 
-            GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vertices.Length), vertices, BufferUsageHint.StaticDraw);
+            //GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vertices.Length), vertices, BufferUsageHint.StaticDraw);
+
+            IBO = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, IBO);
+
+            //GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * indices.Length), indices, BufferUsageHint.StaticDraw);
+
+            vList = new List<Vertex>();
+            uList = new List<uint>();
         }
 
         KeyboardState prevState;
+        MouseState prevMState;
         private void Window_UpdateFrame(object sender, FrameEventArgs e)
         {
             //KeyboardState keyState = Keyboard.GetState();
@@ -110,6 +114,69 @@ namespace GameSandBox
             //MouseState mState = Mouse.GetCursorState();
             //Point mPos = _window.PointToClient(new Point(mState.X, mState.Y));
             //Console.WriteLine("MousePos: {0}, {1}", mPos.X, mPos.Y);
+            MouseState mState = Mouse.GetCursorState();
+            if (mState.IsButtonDown(MouseButton.Left) && prevMState.IsButtonUp(MouseButton.Left))
+            {
+                sCount++;
+                //sCount = 1;
+                //vList.Clear();
+                //uList.Clear();
+                int x = _window.Mouse.X;
+                int y = _window.Mouse.Y;
+                Console.WriteLine("Down! {0}, {1}", x, y);
+                //vertices = new Vertex[4] {
+                //    new Vertex(new Vector2(x - 50, y - 50), new Vector2(0, 0), Color.Red),
+                //    new Vertex(new Vector2(x + 50, y - 50), new Vector2(1, 0), Color.Yellow),
+                //    new Vertex(new Vector2(x + 50, y + 50), new Vector2(1, 1), Color.Blue),
+                //    new Vertex(new Vector2(x - 50, y + 50), new Vector2(0, 1), Color.Green)
+                //};
+                //indices = new uint[6] {
+                //    0, 1, 2,
+                //    0, 2, 3
+                //};
+                vList.Add(new Vertex(new Vector2(x - 50, y - 50), new Vector2(0, 0), Color.Red));
+                vList.Add(new Vertex(new Vector2(x + 50, y - 50), new Vector2(1, 0), Color.Yellow));
+                vList.Add(new Vertex(new Vector2(x + 50, y + 50), new Vector2(1, 1), Color.Blue));
+                vList.Add(new Vertex(new Vector2(x - 50, y + 50), new Vector2(0, 1), Color.Green));
+
+                vList.Add(new Vertex(new Vector2(x + 150, y + 150), new Vector2(0, 0), Color.Red));
+                vList.Add(new Vertex(new Vector2(x + 200, y + 150), new Vector2(1, 0), Color.Yellow));
+                vList.Add(new Vertex(new Vector2(x + 200, y + 200), new Vector2(1, 1), Color.Blue));
+                vList.Add(new Vertex(new Vector2(x + 150, y + 200), new Vector2(0, 1), Color.Green));
+
+                //vList.Add(new Vertex(new Vector2(x + 250, y + 250), new Vector2(0, 0), Color.Red));
+                //vList.Add(new Vertex(new Vector2(x + 350, y + 250), new Vector2(1, 0), Color.Yellow));
+                //vList.Add(new Vertex(new Vector2(x + 350, y + 350), new Vector2(1, 1), Color.Blue));
+                //vList.Add(new Vertex(new Vector2(x + 250, y + 350), new Vector2(0, 1), Color.Green));
+                int offset = vList.Count - 8;
+                uList.Add((uint)(0 + offset));
+                uList.Add((uint)(1 + offset));
+                uList.Add((uint)(2 + offset));
+                uList.Add((uint)(0 + offset));
+                uList.Add((uint)(2 + offset));
+                uList.Add((uint)(3 + offset));
+
+                uList.Add((uint)(4 + offset));
+                uList.Add((uint)(5 + offset));
+                uList.Add((uint)(6 + offset));
+                uList.Add((uint)(4 + offset));
+                uList.Add((uint)(6 + offset));
+                uList.Add((uint)(7 + offset));
+
+                //uList.Add((uint)(8 + offset));
+                //uList.Add((uint)(9 + offset));
+                //uList.Add((uint)(10 + offset));
+                //uList.Add((uint)(8 + offset));
+                //uList.Add((uint)(10 + offset));
+                //uList.Add((uint)(11 + offset));
+
+                Vertex[] vArray = vList.ToArray();
+                GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vArray.Length), vArray, BufferUsageHint.DynamicDraw);
+
+                uint[] uArray = uList.ToArray();
+                GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray.Length), uArray, BufferUsageHint.DynamicDraw);
+            }
+            prevMState = mState;
         }
 
         private void Window_RenderFrame(object sender, FrameEventArgs e)
@@ -127,15 +194,20 @@ namespace GameSandBox
             GL.BindTexture(TextureTarget.Texture2D, texture.ID);
 
             GL.EnableClientState(ArrayCap.VertexArray);
-            GL.EnableClientState(ArrayCap.TextureCoordArray);   
+            GL.EnableClientState(ArrayCap.TextureCoordArray);
             GL.EnableClientState(ArrayCap.ColorArray);
-            GL.VertexPointer(   2, VertexPointerType.Float,      Vertex.SizeInBytes,   0);
-            GL.TexCoordPointer( 2, TexCoordPointerType.Float,    Vertex.SizeInBytes,    Vector2.SizeInBytes);
-            GL.ColorPointer(    4, ColorPointerType.Float,       Vertex.SizeInBytes,    Vector2.SizeInBytes * 2);
+            GL.EnableClientState(ArrayCap.IndexArray);
+
+            GL.VertexPointer(2, VertexPointerType.Float, Vertex.SizeInBytes, 0);
+            GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes);
+            GL.ColorPointer(4, ColorPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes * 2);
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-            //GL.TexCoord2(0.5f, 0.5f);
-            //GL.Color4(Color.Red);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, IBO);
+
+            if (vList.Count > 0)
+            {
+                GL.DrawElements(PrimitiveType.Triangles, uList.Count / sCount, DrawElementsType.UnsignedInt, 0);
+            }
 
             _window.SwapBuffers();
         }
