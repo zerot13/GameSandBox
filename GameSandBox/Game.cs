@@ -21,6 +21,8 @@ namespace GameSandBox
         List<uint> uList;
         int sCount = 0;
 
+        int animX, animY, curFrame, prevFrame;
+
         public Game(GameWindow w)
         {
             _window = w;
@@ -75,27 +77,16 @@ namespace GameSandBox
             GL.AlphaFunc(AlphaFunction.Gequal, 0.6f);
 
             texture = ContentPipe.LoadTexture("Content/penguin.png");
-
-            //vertices = new Vertex[4] {
-            //    new Vertex(new Vector2(0, 0), new Vector2(0, 0), Color.Red),
-            //    new Vertex(new Vector2(100, 0), new Vector2(1, 0), Color.Yellow),
-            //    new Vertex(new Vector2(100, 100), new Vector2(1, 1), Color.Blue),
-            //    //new Vertex(new Vector2(0, 0), new Vector2(0, 0), Color.Red),
-            //    //new Vertex(new Vector2(100, 100), new Vector2(1, 1), Color.Blue),
-            //    new Vertex(new Vector2(0, 100), new Vector2(0, 1), Color.Green)
-            //};
             VBO = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-
-            //GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vertices.Length), vertices, BufferUsageHint.StaticDraw);
 
             IBO = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, IBO);
 
-            //GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * indices.Length), indices, BufferUsageHint.StaticDraw);
-
             vList = new List<Vertex>();
             uList = new List<uint>();
+
+            curFrame = -1;
         }
 
         KeyboardState prevState;
@@ -115,68 +106,63 @@ namespace GameSandBox
             //Point mPos = _window.PointToClient(new Point(mState.X, mState.Y));
             //Console.WriteLine("MousePos: {0}, {1}", mPos.X, mPos.Y);
             MouseState mState = Mouse.GetCursorState();
-            if (mState.IsButtonDown(MouseButton.Left) && prevMState.IsButtonUp(MouseButton.Left))
+            if (mState.IsButtonDown(MouseButton.Left) && prevMState.IsButtonUp(MouseButton.Left) && curFrame == -1)
             {
                 sCount++;
-                //sCount = 1;
-                //vList.Clear();
-                //uList.Clear();
                 int x = _window.Mouse.X;
                 int y = _window.Mouse.Y;
                 Console.WriteLine("Down! {0}, {1}", x, y);
-                //vertices = new Vertex[4] {
-                //    new Vertex(new Vector2(x - 50, y - 50), new Vector2(0, 0), Color.Red),
-                //    new Vertex(new Vector2(x + 50, y - 50), new Vector2(1, 0), Color.Yellow),
-                //    new Vertex(new Vector2(x + 50, y + 50), new Vector2(1, 1), Color.Blue),
-                //    new Vertex(new Vector2(x - 50, y + 50), new Vector2(0, 1), Color.Green)
-                //};
-                //indices = new uint[6] {
-                //    0, 1, 2,
-                //    0, 2, 3
-                //};
-                vList.Add(new Vertex(new Vector2(x - 50, y - 50), new Vector2(0, 0), Color.Red));
-                vList.Add(new Vertex(new Vector2(x + 50, y - 50), new Vector2(1, 0), Color.Yellow));
-                vList.Add(new Vertex(new Vector2(x + 50, y + 50), new Vector2(1, 1), Color.Blue));
-                vList.Add(new Vertex(new Vector2(x - 50, y + 50), new Vector2(0, 1), Color.Green));
 
-                vList.Add(new Vertex(new Vector2(x + 150, y + 150), new Vector2(0, 0), Color.Red));
-                vList.Add(new Vertex(new Vector2(x + 200, y + 150), new Vector2(1, 0), Color.Yellow));
-                vList.Add(new Vertex(new Vector2(x + 200, y + 200), new Vector2(1, 1), Color.Blue));
-                vList.Add(new Vertex(new Vector2(x + 150, y + 200), new Vector2(0, 1), Color.Green));
+                animX = x;
+                animY = y;
+                curFrame = 0;
 
-                //vList.Add(new Vertex(new Vector2(x + 250, y + 250), new Vector2(0, 0), Color.Red));
-                //vList.Add(new Vertex(new Vector2(x + 350, y + 250), new Vector2(1, 0), Color.Yellow));
-                //vList.Add(new Vertex(new Vector2(x + 350, y + 350), new Vector2(1, 1), Color.Blue));
-                //vList.Add(new Vertex(new Vector2(x + 250, y + 350), new Vector2(0, 1), Color.Green));
-                int offset = vList.Count - 8;
-                uList.Add((uint)(0 + offset));
-                uList.Add((uint)(1 + offset));
-                uList.Add((uint)(2 + offset));
-                uList.Add((uint)(0 + offset));
-                uList.Add((uint)(2 + offset));
-                uList.Add((uint)(3 + offset));
+                //AddSticker(x, y);
 
-                uList.Add((uint)(4 + offset));
-                uList.Add((uint)(5 + offset));
-                uList.Add((uint)(6 + offset));
-                uList.Add((uint)(4 + offset));
-                uList.Add((uint)(6 + offset));
-                uList.Add((uint)(7 + offset));
+                //Vertex[] vArray = vList.ToArray();
+                //GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vArray.Length), vArray, BufferUsageHint.DynamicDraw);
 
-                //uList.Add((uint)(8 + offset));
-                //uList.Add((uint)(9 + offset));
-                //uList.Add((uint)(10 + offset));
-                //uList.Add((uint)(8 + offset));
-                //uList.Add((uint)(10 + offset));
-                //uList.Add((uint)(11 + offset));
-
-                Vertex[] vArray = vList.ToArray();
-                GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vArray.Length), vArray, BufferUsageHint.DynamicDraw);
-
-                uint[] uArray = uList.ToArray();
-                GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray.Length), uArray, BufferUsageHint.DynamicDraw);
+                //uint[] uArray = uList.ToArray();
+                //GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray.Length), uArray, BufferUsageHint.DynamicDraw);
             }
             prevMState = mState;
+
+            if(curFrame > -1)
+            {
+                int animOffset;
+                //if (curFrame < 10)
+                //{
+                //    animOffset = (10 * curFrame);
+                //}
+                //else
+                //{
+                    animOffset = 50 - (5 * (curFrame - 10));
+                //}
+                Vertex[] vArray = new Vertex[4] {
+                    new Vertex(new Vector2(animX - 50 - animOffset, animY - 50 - animOffset), new Vector2(0, 0), Color.Red),
+                    new Vertex(new Vector2(animX + 50 + animOffset, animY - 50 - animOffset), new Vector2(1, 0), Color.Yellow),
+                    new Vertex(new Vector2(animX + 50 + animOffset, animY + 50 + animOffset), new Vector2(1, 1), Color.Blue),
+                    new Vertex(new Vector2(animX - 50 - animOffset, animY + 50 + animOffset), new Vector2(0, 1), Color.Green),
+                };
+                uint uAoffset = (uint)vList.Count;
+                uint[] uArray = new uint[6]{
+                    0 + uAoffset, 1 + uAoffset, 2 + uAoffset,
+                    0 + uAoffset, 2 + uAoffset, 3 + uAoffset
+                };
+
+                Vertex[] vArray2 = vList.ToArray().Concat(vArray).ToArray();
+                GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vArray2.Length), vArray2, BufferUsageHint.DynamicDraw);
+
+                uint[] uArray2 = uList.ToArray().Concat(uArray).ToArray();
+                GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray2.Length), uArray2, BufferUsageHint.DynamicDraw);
+
+                curFrame++;
+                if (curFrame == 21)
+                {
+                    AddSticker(animX, animY);
+                    curFrame = -1;
+                }
+            }
         }
 
         private void Window_RenderFrame(object sender, FrameEventArgs e)
@@ -204,12 +190,28 @@ namespace GameSandBox
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, IBO);
 
-            if (vList.Count > 0)
+            if (vList.Count > 0 || curFrame > -1)
             {
-                GL.DrawElements(PrimitiveType.Triangles, uList.Count / sCount, DrawElementsType.UnsignedInt, 0);
+                int iCount = uList.Count + (curFrame > 0 ? 6 : 0);
+                GL.DrawElements(PrimitiveType.Triangles, iCount, DrawElementsType.UnsignedInt, 0);
             }
 
             _window.SwapBuffers();
+        }
+
+        private void AddSticker(int x, int y)
+        {
+            vList.Add(new Vertex(new Vector2(x - 50, y - 50), new Vector2(0, 0), Color.Red));
+            vList.Add(new Vertex(new Vector2(x + 50, y - 50), new Vector2(1, 0), Color.Yellow));
+            vList.Add(new Vertex(new Vector2(x + 50, y + 50), new Vector2(1, 1), Color.Blue));
+            vList.Add(new Vertex(new Vector2(x - 50, y + 50), new Vector2(0, 1), Color.Green));
+            int offset = vList.Count - 4;
+            uList.Add((uint)(0 + offset));
+            uList.Add((uint)(1 + offset));
+            uList.Add((uint)(2 + offset));
+            uList.Add((uint)(0 + offset));
+            uList.Add((uint)(2 + offset));
+            uList.Add((uint)(3 + offset));
         }
 
         private void DrawPenguin()
