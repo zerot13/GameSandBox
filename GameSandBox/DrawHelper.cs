@@ -26,6 +26,13 @@ namespace GameSandBox
             _color = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f); ;
         }
 
+        public Vertex(Vector2 position, Color color)
+        {
+            _position = position;
+            _texCoord = new Vector2(0, 0);
+            _color = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f); ;
+        }
+
         public Vector2 Position
         {
             get { return _position; }

@@ -14,9 +14,7 @@ namespace GameSandBox
     {
         private GameWindow _window;
         Texture2D texture;
-        int VBO, IBO;
-        Vertex[] vertices;
-        uint[] indices;
+        int VBO, IBO, SVBO2, SIBO2, BackVBO, BackIBO;
         List<Vertex> vList;
         List<uint> uList;
         int sCount = 0;
@@ -30,38 +28,6 @@ namespace GameSandBox
             _window.Load += Window_Load;
             _window.UpdateFrame += Window_UpdateFrame;
             _window.RenderFrame += Window_RenderFrame;
-            _window.KeyDown += Window_KeyDown;
-            _window.KeyUp += Window_KeyUp;
-            _window.KeyPress += Window_KeyPress;
-            _window.MouseMove += Window_MouseMove;
-            _window.MouseWheel += Window_MouseWheel;
-        }
-
-        private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            Console.WriteLine("Delta: {0} / {1}\nValue: {2} / {3}\n", e.Delta, e.DeltaPrecise, e.Value, e.ValuePrecise);
-        }
-
-        Vector2 mousePos;
-        private void Window_MouseMove(object sender, MouseMoveEventArgs e)
-        {
-            //Console.WriteLine("MouseMove: {0}, {1}", e.X, e.Y);
-            mousePos = new Vector2(e.X, e.Y);
-        }
-
-        private void Window_KeyDown(object sender, KeyboardKeyEventArgs e)
-        {
-            //Console.WriteLine("KeyDown: {0} - {1}", e.Key, sender);
-        }
-
-        private void Window_KeyUp(object sender, KeyboardKeyEventArgs e)
-        {
-            //Console.WriteLine("KeyUp: {0} - {1}", e.Key, sender);
-        }
-
-        private void Window_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            //Console.WriteLine("KeyPress: {0} - {1}", e.KeyChar, sender);
         }
 
         private void Window_Load(object sender, EventArgs e)
@@ -77,11 +43,15 @@ namespace GameSandBox
             GL.AlphaFunc(AlphaFunction.Gequal, 0.6f);
 
             texture = ContentPipe.LoadTexture("Content/penguin.png");
-            VBO = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
 
+            VBO = GL.GenBuffer();
             IBO = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, IBO);
+
+            SVBO2 = GL.GenBuffer();
+            SIBO2 = GL.GenBuffer();
+
+            BackVBO = GL.GenBuffer();
+            BackIBO = GL.GenBuffer();
 
             vList = new List<Vertex>();
             uList = new List<uint>();
@@ -93,18 +63,8 @@ namespace GameSandBox
         MouseState prevMState;
         private void Window_UpdateFrame(object sender, FrameEventArgs e)
         {
-            //KeyboardState keyState = Keyboard.GetState();
+            DrawGrid();
 
-            //if (keyState.IsKeyDown(Key.Enter) && prevState.IsKeyUp(Key.Enter))
-            //{
-            //    Console.WriteLine("Enter!");
-            //}
-            //prevState = keyState;
-
-            //Console.WriteLine("MousePos: {0}, {1}", _window.Mouse.X, _window.Mouse.Y);
-            //MouseState mState = Mouse.GetCursorState();
-            //Point mPos = _window.PointToClient(new Point(mState.X, mState.Y));
-            //Console.WriteLine("MousePos: {0}, {1}", mPos.X, mPos.Y);
             MouseState mState = Mouse.GetCursorState();
             if (mState.IsButtonDown(MouseButton.Left) && prevMState.IsButtonUp(MouseButton.Left) && curFrame == -1)
             {
@@ -115,17 +75,27 @@ namespace GameSandBox
 
                 animX = x;
                 animY = y;
-                curFrame = 0;
-
-                //AddSticker(x, y);
-
-                //Vertex[] vArray = vList.ToArray();
-                //GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vArray.Length), vArray, BufferUsageHint.DynamicDraw);
-
-                //uint[] uArray = uList.ToArray();
-                //GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray.Length), uArray, BufferUsageHint.DynamicDraw);
+                
+                if (!ClickedOnGrid(x, y))
+                {
+                    curFrame = 0;
+                }
             }
             prevMState = mState;
+
+            if (curFrame == 21)
+            {
+                AddSticker(animX, animY);
+                curFrame = -1;
+            }
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+            Vertex[] vArray2 = vList.ToArray();
+            GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vArray2.Length), vArray2, BufferUsageHint.DynamicDraw);
+
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, IBO);
+            uint[] uArray2 = uList.ToArray();
+            GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray2.Length), uArray2, BufferUsageHint.DynamicDraw);
 
             if(curFrame > -1)
             {
@@ -138,36 +108,97 @@ namespace GameSandBox
                 //{
                     animOffset = 50 - (5 * (curFrame - 10));
                 //}
-                Vertex[] vArray = new Vertex[4] {
+                Vertex[] animArray = new Vertex[4] {
                     new Vertex(new Vector2(animX - 50 - animOffset, animY - 50 - animOffset), new Vector2(0, 0), Color.Red),
                     new Vertex(new Vector2(animX + 50 + animOffset, animY - 50 - animOffset), new Vector2(1, 0), Color.Yellow),
                     new Vertex(new Vector2(animX + 50 + animOffset, animY + 50 + animOffset), new Vector2(1, 1), Color.Blue),
                     new Vertex(new Vector2(animX - 50 - animOffset, animY + 50 + animOffset), new Vector2(0, 1), Color.Green),
                 };
-                uint uAoffset = (uint)vList.Count;
                 uint[] uArray = new uint[6]{
-                    0 + uAoffset, 1 + uAoffset, 2 + uAoffset,
-                    0 + uAoffset, 2 + uAoffset, 3 + uAoffset
+                    0, 1, 2,
+                    0, 2, 3
                 };
 
-                Vertex[] vArray2 = vList.ToArray().Concat(vArray).ToArray();
-                GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * vArray2.Length), vArray2, BufferUsageHint.DynamicDraw);
-
-                uint[] uArray2 = uList.ToArray().Concat(uArray).ToArray();
-                GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray2.Length), uArray2, BufferUsageHint.DynamicDraw);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, SVBO2);
+                GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * animArray.Length), animArray, BufferUsageHint.DynamicDraw);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, SIBO2);
+                GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray.Length), uArray, BufferUsageHint.DynamicDraw);
 
                 curFrame++;
-                if (curFrame == 21)
-                {
-                    AddSticker(animX, animY);
-                    curFrame = -1;
-                }
             }
+        }
+
+        private bool ClickedOnGrid(int x, int y)
+        {
+            int width = _window.Width;
+            int height = _window.Height;
+            if(x > width / 3 - 5 && x < width / 3 + 5)
+            {
+                return true;
+            }
+            if (x > 2 * width / 3 - 5 && x < 2 * width / 3 + 5)
+            {
+                return true;
+            }
+            if (y > height / 3 - 5 && y < height / 3 + 5)
+            {
+                return true;
+            }
+            if (y > 2 * height / 3 - 5 && y < 2 * height / 3 + 5)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private void DrawGrid()
+        {
+            int width = _window.Width;
+            int height = _window.Height;
+
+            Vertex[] gridArray = new Vertex[16]
+            {
+                new Vertex(new Vector2(width / 3 - 5, 0), new Vector2(0, 0), Color.White),
+                new Vertex(new Vector2(width / 3 + 5, 0), new Vector2(1, 0), Color.White),
+                new Vertex(new Vector2(width / 3 + 5, height), new Vector2(1, 1), Color.White),
+                new Vertex(new Vector2(width / 3 - 5, height), new Vector2(0, 1), Color.White),
+                
+                new Vertex(new Vector2(2 * width / 3 - 5, 0), new Vector2(0, 0), Color.White),
+                new Vertex(new Vector2(2 * width / 3 + 5, 0), new Vector2(1, 0), Color.White),
+                new Vertex(new Vector2(2 * width / 3 + 5, height), new Vector2(1, 1), Color.White),
+                new Vertex(new Vector2(2 * width / 3 - 5, height), new Vector2(0, 1), Color.White),
+                
+                new Vertex(new Vector2(0, height / 3 - 5), new Vector2(0, 0), Color.White),
+                new Vertex(new Vector2(0, height / 3 + 5), new Vector2(1, 0), Color.White),
+                new Vertex(new Vector2(width, height / 3 + 5), new Vector2(1, 1), Color.White),
+                new Vertex(new Vector2(width, height / 3 - 5), new Vector2(0, 1), Color.White),
+                
+                new Vertex(new Vector2(0, 2 * height / 3 - 5), new Vector2(0, 0), Color.White),
+                new Vertex(new Vector2(0, 2 * height / 3 + 5), new Vector2(1, 0), Color.White),
+                new Vertex(new Vector2(width, 2 * height / 3 + 5), new Vector2(1, 1), Color.White),
+                new Vertex(new Vector2(width, 2 * height / 3 - 5), new Vector2(0, 1), Color.White),
+            };
+            uint[] uArray = new uint[24]{
+                0, 1, 2,
+                0, 2, 3,
+                4, 5, 6,
+                4, 6, 7,
+                8, 9, 10,
+                8, 10, 11,
+                12, 13, 14,
+                12, 14, 15
+            };
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, BackVBO);
+            GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * gridArray.Length), gridArray, BufferUsageHint.DynamicDraw);
+
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, BackIBO);
+            GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray.Length), uArray, BufferUsageHint.DynamicDraw);
         }
 
         private void Window_RenderFrame(object sender, FrameEventArgs e)
         {
-            GL.ClearColor(Color.CornflowerBlue);
+            GL.ClearColor(Color.Black);
             GL.ClearDepth(1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -177,22 +208,41 @@ namespace GameSandBox
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadIdentity();
 
-            GL.BindTexture(TextureTarget.Texture2D, texture.ID);
-
             GL.EnableClientState(ArrayCap.VertexArray);
             GL.EnableClientState(ArrayCap.TextureCoordArray);
             GL.EnableClientState(ArrayCap.ColorArray);
             GL.EnableClientState(ArrayCap.IndexArray);
 
+            // Draw TTT grid
+            GL.BindTexture(TextureTarget.Texture2D, -1);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, BackVBO);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, BackIBO);
             GL.VertexPointer(2, VertexPointerType.Float, Vertex.SizeInBytes, 0);
             GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes);
             GL.ColorPointer(4, ColorPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes * 2);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, IBO);
+            //int iCount = uList.Count;
+            GL.DrawElements(PrimitiveType.Triangles, 24, DrawElementsType.UnsignedInt, 0);
+            // END TTT grid
 
-            if (vList.Count > 0 || curFrame > -1)
+            GL.BindTexture(TextureTarget.Texture2D, texture.ID);
+            if (vList.Count > 0)
             {
-                int iCount = uList.Count + (curFrame > 0 ? 6 : 0);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, IBO);
+                GL.VertexPointer(2, VertexPointerType.Float, Vertex.SizeInBytes, 0);
+                GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes);
+                GL.ColorPointer(4, ColorPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes * 2);
+                int iCount = uList.Count;
+                GL.DrawElements(PrimitiveType.Triangles, iCount, DrawElementsType.UnsignedInt, 0);
+            }
+            if(curFrame > -1)
+            {
+                GL.BindBuffer(BufferTarget.ArrayBuffer, SVBO2);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, SIBO2);
+                GL.VertexPointer(2, VertexPointerType.Float, Vertex.SizeInBytes, 0);
+                GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes);
+                GL.ColorPointer(4, ColorPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes * 2);
+                int iCount = 6;
                 GL.DrawElements(PrimitiveType.Triangles, iCount, DrawElementsType.UnsignedInt, 0);
             }
 
@@ -212,70 +262,6 @@ namespace GameSandBox
             uList.Add((uint)(0 + offset));
             uList.Add((uint)(2 + offset));
             uList.Add((uint)(3 + offset));
-        }
-
-        private void DrawPenguin()
-        {
-            GL.BindTexture(TextureTarget.Texture2D, texture.ID);
-
-            GL.Begin(PrimitiveType.Triangles);
-
-            GL.Color4(1f, 1f, 1f, 1f);
-            GL.TexCoord2(0, 0);
-            GL.Vertex2(0, 0);
-            GL.TexCoord2(1, 1);
-            GL.Vertex2(500, 525);
-            GL.TexCoord2(0, 1);
-            GL.Vertex2(0, 525);
-
-            GL.TexCoord2(0, 0);
-            GL.Vertex2(0, 0);
-            GL.TexCoord2(1, 0);
-            GL.Vertex2(500, 0);
-            GL.TexCoord2(1, 1);
-            GL.Vertex2(500, 525);
-
-            GL.End();
-        }
-
-        private void DrawSquare()
-        {
-            //GL.Begin(PrimitiveType.Quads);
-            //GL.Color4(1f, 1f, 1f, 1f);
-            //GL.TexCoord2(0, 0);
-            //GL.Vertex2(1, 1);
-            //GL.TexCoord2(1, 0);
-            //GL.Vertex2(0, 1);
-            //GL.TexCoord2(1, 1);
-            //GL.Vertex2(0, 0);
-            //GL.TexCoord2(0, 1);
-            //GL.Vertex2(1, 0);
-            //GL.End();
-        }
-
-        private void MultiPenguin()
-        {
-            //Matrix4 modelViewMatrix = Matrix4.CreateScale(.5f, .5f, 1f) * Matrix4.CreateRotationZ(0f) * Matrix4.CreateTranslation(0f, 0f, 0f);
-            //GL.MatrixMode(MatrixMode.Modelview);
-            //GL.LoadMatrix(ref modelViewMatrix);
-            //DrawPenguin();
-
-            //modelViewMatrix = Matrix4.CreateScale(.6f, .4f, 1f) * Matrix4.CreateRotationZ(0f) * Matrix4.CreateTranslation(300f, 0f, 0f);
-            //GL.MatrixMode(MatrixMode.Modelview);
-            //GL.LoadMatrix(ref modelViewMatrix);
-            //DrawPenguin();
-            //GL.LoadIdentity();
-
-            //modelViewMatrix = Matrix4.CreateScale(.5f, .5f, 1f) * Matrix4.CreateRotationZ(0.4f) * Matrix4.CreateTranslation(200f, 250f, 0f);
-            //GL.MatrixMode(MatrixMode.Modelview);
-            //GL.LoadMatrix(ref modelViewMatrix);
-            //DrawPenguin();
-
-            //modelViewMatrix = Matrix4.CreateScale(1f, 1f, 1f) * Matrix4.CreateRotationZ(0.4f) * Matrix4.CreateTranslation(0f, 0f, -0.1f);
-            //GL.MatrixMode(MatrixMode.Modelview);
-            //GL.LoadMatrix(ref modelViewMatrix);
-            //DrawPenguin();
-            //GL.BindTexture(TextureTarget.Texture2D, texture.ID);
         }
     }
 }
