@@ -9,11 +9,28 @@ namespace GameSandBox
     class GameState
     {
         public int[] gameBoard;
+        private int vQuads;
+        private int hQuads;
 
         public GameState()
         {
-            gameBoard = new int[9];
-            for(int index = 0; index < 9; index++)
+            vQuads = 3;
+            hQuads = 3;
+            int count = vQuads * hQuads;
+            gameBoard = new int[count];
+            for (int index = 0; index < count; index++)
+            {
+                gameBoard[index] = 0;
+            }
+        }
+
+        public GameState(int v, int h)
+        {
+            vQuads = v;
+            hQuads = h;
+            int count = vQuads * hQuads;
+            gameBoard = new int[count];
+            for (int index = 0; index < count; index++)
             {
                 gameBoard[index] = 0;
             }
@@ -21,14 +38,14 @@ namespace GameSandBox
 
         public bool IsSquareTaken(int x, int y)
         {
-            int index = 3 * y + x;
+            int index = hQuads * y + x;
             return gameBoard[index] > 0;
         }
 
-        internal bool TakeSquare(int x, int y, bool curPlayer)
+        internal bool TakeSquare(int x, int y, int curPlayer)
         {
-            int index = 3 * y + x;
-            gameBoard[index] = curPlayer ? 2 : 1;
+            int index = hQuads * y + x;
+            gameBoard[index] = curPlayer + 1;
             return CheckWin();
         }
 

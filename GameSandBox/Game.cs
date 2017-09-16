@@ -13,11 +13,7 @@ namespace GameSandBox
     class Game
     {
         private GameWindow _window;
-        Texture2D texture;
         Texture2D textureX, textureO;
-        //int VBO, IBO, SVBO2, SIBO2, BackVBO, BackIBO;
-        //List<Vertex> vList;
-        //List<uint> uList;
         int XVBO, XIBO, OVBO, OIBO, AnimVBO, AnimIBO, BackVBO, BackIBO;
         List<Vertex> xVList;
         List<uint> xUList;
@@ -26,12 +22,32 @@ namespace GameSandBox
         int sCount = 0;
         GameState gState;
 
-        int animX, animY, curFrame, prevFrame;
-        bool curPlayer = false;
+        int hQuads, vQuads;
+
+        int animFrames = 21;
+
+        int animX, animY, curFrame;
+        int curPlayer = 0;
+        int numPlayers;
 
         public Game(GameWindow w)
         {
             _window = w;
+            hQuads = 3;
+            vQuads = 3;
+            numPlayers = 2;
+
+            _window.Load += Window_Load;
+            _window.UpdateFrame += Window_UpdateFrame;
+            _window.RenderFrame += Window_RenderFrame;
+        }
+
+        public Game(GameWindow w, int horizontalQuadrants, int verticalQuadrants, int numberOfPlayers)
+        {
+            _window = w;
+            hQuads = horizontalQuadrants;
+            vQuads = verticalQuadrants;
+            numPlayers = numberOfPlayers;
 
             _window.Load += Window_Load;
             _window.UpdateFrame += Window_UpdateFrame;
@@ -40,7 +56,7 @@ namespace GameSandBox
 
         private void Window_Load(object sender, EventArgs e)
         {
-            gState = new GameState();
+            gState = new GameState(vQuads, hQuads);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
@@ -50,16 +66,8 @@ namespace GameSandBox
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.AlphaTest);
             GL.AlphaFunc(AlphaFunction.Gequal, 0.6f);
-
-            //texture = ContentPipe.LoadTexture("Content/penguin.png");
             textureX = ContentPipe.LoadTexture("Content/xTexture.png");
             textureO = ContentPipe.LoadTexture("Content/oTexture.png");
-
-            //VBO = GL.GenBuffer();
-            //IBO = GL.GenBuffer();
-
-            //SVBO2 = GL.GenBuffer();
-            //SIBO2 = GL.GenBuffer();
 
             XVBO = GL.GenBuffer();
             XIBO = GL.GenBuffer();
@@ -73,8 +81,6 @@ namespace GameSandBox
             BackVBO = GL.GenBuffer();
             BackIBO = GL.GenBuffer();
 
-            //vList = new List<Vertex>();
-            //uList = new List<uint>();
             xVList = new List<Vertex>();
             xUList = new List<uint>();
             oVList = new List<Vertex>();
@@ -83,7 +89,6 @@ namespace GameSandBox
             curFrame = -1;
         }
 
-        KeyboardState prevState;
         MouseState prevMState;
         private void Window_UpdateFrame(object sender, FrameEventArgs e)
         {
@@ -99,8 +104,8 @@ namespace GameSandBox
                 if (!ClickedOnGrid(x, y))
                 {
                     // segW and segH are the width and height of each square on the board
-                    int segW = _window.Width / 3;
-                    int segH = _window.Height / 3;
+                    int segW = _window.Width / hQuads;
+                    int segH = _window.Height / vQuads;
                     int quadX = x / segW;
                     int quadY = y / segH;
                     if(!gState.IsSquareTaken(quadX, quadY))
@@ -114,9 +119,9 @@ namespace GameSandBox
             }
             prevMState = mState;
 
-            if (curFrame == 21)
+            if (curFrame == animFrames)
             {
-                if(!curPlayer)
+                if(curPlayer == 0)
                 {
                     AddSticker(animX, animY, ref xVList, ref xUList);
                 }
@@ -124,7 +129,7 @@ namespace GameSandBox
                 {
                     AddSticker(animX, animY, ref oVList, ref oUList);
                 }
-                curPlayer = !curPlayer;
+                curPlayer = (curPlayer + 1) % numPlayers;
                 curFrame = -1;
             }
 
@@ -147,7 +152,7 @@ namespace GameSandBox
             if(curFrame > -1)
             {
                 int animOffset;
-                animOffset = 50 - (5 * (curFrame - 10));
+                animOffset = 50 - (5 * (curFrame - ((animFrames - 1) / 2)));
 
                 Vertex[] animArray = new Vertex[4] {
                     new Vertex(new Vector2(animX - 50 - animOffset, animY - 50 - animOffset), new Vector2(0, 0), Color.Red),
@@ -173,19 +178,19 @@ namespace GameSandBox
         {
             int width = _window.Width;
             int height = _window.Height;
-            if(x > width / 3 - 10 && x < width / 3 + 10)
+            if (x > width / hQuads - 10 && x < width / hQuads + 10)
             {
                 return true;
             }
-            if (x > 2 * width / 3 - 10 && x < 2 * width / 3 + 10)
+            if (x > 2 * width / hQuads - 10 && x < 2 * width / hQuads + 10)
             {
                 return true;
             }
-            if (y > height / 3 - 10 && y < height / 3 + 10)
+            if (y > height / vQuads - 10 && y < height / vQuads + 10)
             {
                 return true;
             }
-            if (y > 2 * height / 3 - 10 && y < 2 * height / 3 + 10)
+            if (y > 2 * height / vQuads - 10 && y < 2 * height / vQuads + 10)
             {
                 return true;
             }
@@ -197,38 +202,47 @@ namespace GameSandBox
             int width = _window.Width;
             int height = _window.Height;
 
-            Vertex[] gridArray = new Vertex[16]
+            int gridCount = (vQuads - 1) + (hQuads - 1);
+
+            Vertex[] gridArray = new Vertex[gridCount * 4];
+            uint[] uArray = new uint[gridCount * 6];
+
+            int index = 0;
+            // Store the vertical lines first
+            for (; index < (vQuads - 1); index++)
             {
-                new Vertex(new Vector2(width / 3 - 5, 0), new Vector2(0, 0), Color.White),
-                new Vertex(new Vector2(width / 3 + 5, 0), new Vector2(1, 0), Color.White),
-                new Vertex(new Vector2(width / 3 + 5, height), new Vector2(1, 1), Color.White),
-                new Vertex(new Vector2(width / 3 - 5, height), new Vector2(0, 1), Color.White),
-                
-                new Vertex(new Vector2(2 * width / 3 - 5, 0), new Vector2(0, 0), Color.White),
-                new Vertex(new Vector2(2 * width / 3 + 5, 0), new Vector2(1, 0), Color.White),
-                new Vertex(new Vector2(2 * width / 3 + 5, height), new Vector2(1, 1), Color.White),
-                new Vertex(new Vector2(2 * width / 3 - 5, height), new Vector2(0, 1), Color.White),
-                
-                new Vertex(new Vector2(0, height / 3 - 5), new Vector2(0, 0), Color.White),
-                new Vertex(new Vector2(0, height / 3 + 5), new Vector2(1, 0), Color.White),
-                new Vertex(new Vector2(width, height / 3 + 5), new Vector2(1, 1), Color.White),
-                new Vertex(new Vector2(width, height / 3 - 5), new Vector2(0, 1), Color.White),
-                
-                new Vertex(new Vector2(0, 2 * height / 3 - 5), new Vector2(0, 0), Color.White),
-                new Vertex(new Vector2(0, 2 * height / 3 + 5), new Vector2(1, 0), Color.White),
-                new Vertex(new Vector2(width, 2 * height / 3 + 5), new Vector2(1, 1), Color.White),
-                new Vertex(new Vector2(width, 2 * height / 3 - 5), new Vector2(0, 1), Color.White),
-            };
-            uint[] uArray = new uint[24]{
-                0, 1, 2,
-                0, 2, 3,
-                4, 5, 6,
-                4, 6, 7,
-                8, 9, 10,
-                8, 10, 11,
-                12, 13, 14,
-                12, 14, 15
-            };
+                int vIndex = index * 4;
+                gridArray[vIndex] = new Vertex(new Vector2((index + 1) * width / hQuads - 5, 0), new Vector2(0, 0), Color.White);
+                gridArray[vIndex + 1] = new Vertex(new Vector2((index + 1) * width / hQuads + 5, 0), new Vector2(1, 0), Color.White);
+                gridArray[vIndex + 2] = new Vertex(new Vector2((index + 1) * width / hQuads + 5, height), new Vector2(1, 1), Color.White);
+                gridArray[vIndex + 3] = new Vertex(new Vector2((index + 1) * width / hQuads - 5, height), new Vector2(0, 1), Color.White);
+
+                uint uIndex = (uint)index * 6;
+                uArray[uIndex] = (uint)vIndex;
+                uArray[uIndex + 1] = (uint)vIndex + 1;
+                uArray[uIndex + 2] = (uint)vIndex + 2;
+                uArray[uIndex + 3] = (uint)vIndex;
+                uArray[uIndex + 4] = (uint)vIndex + 2;
+                uArray[uIndex + 5] = (uint)vIndex + 3;
+            }
+            // Then store the horizontal lines
+            for (; index < gridCount; index++)
+            {
+                int vIndex = index * 4;
+                int multiplierIndex = index - (vQuads - 1);
+                gridArray[vIndex] = new Vertex(new Vector2(0, (multiplierIndex + 1) * height / vQuads - 5), new Vector2(0, 0), Color.White);
+                gridArray[vIndex + 1] = new Vertex(new Vector2(0, (multiplierIndex + 1) * height / vQuads + 5), new Vector2(1, 0), Color.White);
+                gridArray[vIndex + 2] = new Vertex(new Vector2(width, (multiplierIndex + 1) * height / vQuads + 5), new Vector2(1, 1), Color.White);
+                gridArray[vIndex + 3] = new Vertex(new Vector2(width, (multiplierIndex + 1) * height / vQuads - 5), new Vector2(0, 1), Color.White);
+
+                int uIndex = index * 6;
+                uArray[uIndex] = (uint)vIndex;
+                uArray[uIndex + 1] = (uint)vIndex + 1;
+                uArray[uIndex + 2] = (uint)vIndex + 2;
+                uArray[uIndex + 3] = (uint)vIndex;
+                uArray[uIndex + 4] = (uint)vIndex + 2;
+                uArray[uIndex + 5] = (uint)vIndex + 3;
+            }
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, BackVBO);
             GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * gridArray.Length), gridArray, BufferUsageHint.DynamicDraw);
@@ -261,8 +275,8 @@ namespace GameSandBox
             GL.VertexPointer(2, VertexPointerType.Float, Vertex.SizeInBytes, 0);
             GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes);
             GL.ColorPointer(4, ColorPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes * 2);
-            //int iCount = uList.Count;
-            GL.DrawElements(PrimitiveType.Triangles, 24, DrawElementsType.UnsignedInt, 0);
+            int iCount = ((vQuads - 1) + (hQuads - 1)) * 6;
+            GL.DrawElements(PrimitiveType.Triangles, iCount, DrawElementsType.UnsignedInt, 0);
             // END TTT grid
 
             if (xVList.Count > 0)
@@ -287,7 +301,7 @@ namespace GameSandBox
             }
             if(curFrame > -1)
             {
-                if(!curPlayer)
+                if(curPlayer == 0)
                 {
                     GL.BindTexture(TextureTarget.Texture2D, textureX.ID);
                 }
