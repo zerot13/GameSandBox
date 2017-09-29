@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameSandBox", "GameSandBox\GameSandBox.csproj", "{1A1F956C-0CA7-4157-890B-BB0E8921E8E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameUnitTests", "GameUnitTests\GameUnitTests.csproj", "{F80149C1-4F00-47F9-8781-A5AE2839938E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{1A1F956C-0CA7-4157-890B-BB0E8921E8E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A1F956C-0CA7-4157-890B-BB0E8921E8E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A1F956C-0CA7-4157-890B-BB0E8921E8E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F80149C1-4F00-47F9-8781-A5AE2839938E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F80149C1-4F00-47F9-8781-A5AE2839938E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F80149C1-4F00-47F9-8781-A5AE2839938E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F80149C1-4F00-47F9-8781-A5AE2839938E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameSandBox
 {
-    class GameState
+    public class GameState
     {
         public int[] gameBoard;
         private int vQuads;
@@ -42,7 +42,7 @@ namespace GameSandBox
             return gameBoard[index] > 0;
         }
 
-        internal bool TakeSquare(int x, int y, int curPlayer)
+        public bool TakeSquare(int x, int y, int curPlayer)
         {
             int index = hQuads * y + x;
             gameBoard[index] = curPlayer + 1;
@@ -92,7 +92,7 @@ namespace GameSandBox
                 {
                     for(int index = 0; index < hQuads; index++)
                     {
-                        if(gameBoard[index * (hQuads + 1)] == curPlayer)
+                        if(gameBoard[index * (hQuads + 1)] != curPlayer)
                         {
                             isWin = false;
                             break;
@@ -110,7 +110,7 @@ namespace GameSandBox
                 {
                     for (int index = 1; index <= hQuads; index++)
                     {
-                        if (gameBoard[index * (hQuads - 1)] == curPlayer)
+                        if (gameBoard[index * (hQuads - 1)] != curPlayer)
                         {
                             isWin = false;
                             break;
@@ -122,7 +122,7 @@ namespace GameSandBox
                     }
                 }
             }
-            return isWin;
+            return false;
         }
     }
 }

@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GameSandBox.1.0.0.0.Fakes</name>
+    </assembly>
+    <members>
+        <member name="T:GameSandBox.Fakes.ShimGameState">
+            <summary>Shim type of GameSandBox.GameState</summary>
+        </member>
+        <member name="M:GameSandBox.Fakes.ShimGameState.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:GameSandBox.Fakes.ShimGameState.#ctor(GameSandBox.GameState)">
+            <summary>Initializes a new shim for the given instance</summary>
+        </member>
+        <member name="M:GameSandBox.Fakes.ShimGameState.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:GameSandBox.Fakes.ShimGameState.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.ShimGameState.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.ShimGameState.CheckWinInt32Int32Int32">
+            <summary>Sets the shim of GameState.CheckWin(Int32 x, Int32 y, Int32 curPlayer)</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.ShimGameState.Constructor">
+            <summary>Sets the shim of GameState.GameState()</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.ShimGameState.ConstructorInt32Int32">
+            <summary>Sets the shim of GameState.GameState(Int32 v, Int32 h)</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.ShimGameState.IsSquareTakenInt32Int32">
+            <summary>Sets the shim of GameState.IsSquareTaken(Int32 x, Int32 y)</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.ShimGameState.TakeSquareInt32Int32Int32">
+            <summary>Sets the shim of GameState.TakeSquare(Int32 x, Int32 y, Int32 curPlayer)</summary>
+        </member>
+        <member name="T:GameSandBox.Fakes.ShimGameState.AllInstances">
+            <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.ShimGameState.AllInstances.CheckWinInt32Int32Int32">
+            <summary>Sets the shim of GameState.CheckWin(Int32 x, Int32 y, Int32 curPlayer)</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.ShimGameState.AllInstances.IsSquareTakenInt32Int32">
+            <summary>Sets the shim of GameState.IsSquareTaken(Int32 x, Int32 y)</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.ShimGameState.AllInstances.TakeSquareInt32Int32Int32">
+            <summary>Sets the shim of GameState.TakeSquare(Int32 x, Int32 y, Int32 curPlayer)</summary>
+        </member>
+        <member name="T:GameSandBox.Fakes.StubGameState">
+            <summary>Stub type of GameSandBox.GameState</summary>
+        </member>
+        <member name="M:GameSandBox.Fakes.StubGameState.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:GameSandBox.Fakes.StubGameState.#ctor(System.Int32,System.Int32)">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:GameSandBox.Fakes.StubGameState.InitializeStub">
+            <summary>Initializes a new instance of type StubGameState</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.StubGameState.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.StubGameState.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="P:GameSandBox.Fakes.StubGameState.InstanceObserver">
+            <summary>Gets or sets the instance observer.</summary>
+        </member>
+    </members>
+</doc>
