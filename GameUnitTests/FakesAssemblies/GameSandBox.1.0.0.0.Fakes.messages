@@ -1,0 +1,14 @@
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate stub for GameSandBox.ContentPipe: type is not visible to exported or assembly(GameSandBox.1.0.0.0.Fakes).
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate stub for GameSandBox.Vertex: type is a value type.
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate stub for GameSandBox.Game: type is not visible to exported or assembly(GameSandBox.1.0.0.0.Fakes).
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate stub for GameSandBox.VictoryDirection: type is a value type.
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate stub for GameSandBox.Program: type is not visible to exported or assembly(GameSandBox.1.0.0.0.Fakes).
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate stub for GameSandBox.Texture2D: type is not visible to exported or assembly(GameSandBox.1.0.0.0.Fakes).
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate stub for <PrivateImplementationDetails>{D08C40DA-441F-45DC-BF59-8AAB89123620}: type is not supported because of internal limitations.
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate shim for GameSandBox.ContentPipe: type is not visible to exported or assembly(GameSandBox.1.0.0.0.Fakes).
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate shim for GameSandBox.Vertex: type is not visible to exported or assembly(GameSandBox.1.0.0.0.Fakes).
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate shim for GameSandBox.Game: type is not visible to exported or assembly(GameSandBox.1.0.0.0.Fakes).
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate shim for GameSandBox.VictoryDirection: type is an enum.
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate shim for GameSandBox.Program: type is not visible to exported or assembly(GameSandBox.1.0.0.0.Fakes).
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate shim for GameSandBox.Texture2D: type is not visible to exported or assembly(GameSandBox.1.0.0.0.Fakes).
+D:\GitHub\GameSandBox\GameSandBox\GameUnitTests\Fakes\GameSandBox.fakes : warning : Cannot generate shim for <PrivateImplementationDetails>{D08C40DA-441F-45DC-BF59-8AAB89123620}: type is not supported because of internal limitations.

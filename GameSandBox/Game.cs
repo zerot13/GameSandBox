@@ -15,6 +15,7 @@ namespace GameSandBox
         private GameWindow _window;
         Texture2D textureX, textureO;
         int XVBO, XIBO, OVBO, OIBO, AnimVBO, AnimIBO, BackVBO, BackIBO;
+        int victoryAnimVBO, victoryAnimIBO;
         List<Vertex> xVList;
         List<uint> xUList;
         List<Vertex> oVList;
@@ -28,7 +29,11 @@ namespace GameSandBox
 
         int animX, animY, curFrame;
         int curPlayer = 0;
+        int victoryAnimX, victoryAnimY;
         int numPlayers;
+
+        VictoryDirection isGameWon = VictoryDirection.None;
+        int curVictoryFrame = -1;
 
         public Game(GameWindow w)
         {
@@ -78,6 +83,9 @@ namespace GameSandBox
             AnimVBO = GL.GenBuffer();
             AnimIBO = GL.GenBuffer();
 
+            victoryAnimVBO = GL.GenBuffer();
+            victoryAnimIBO = GL.GenBuffer();
+
             BackVBO = GL.GenBuffer();
             BackIBO = GL.GenBuffer();
 
@@ -95,7 +103,7 @@ namespace GameSandBox
             DrawGrid();
 
             MouseState mState = Mouse.GetCursorState();
-            if (mState.IsButtonDown(MouseButton.Left) && prevMState.IsButtonUp(MouseButton.Left) && curFrame == -1)
+            if (mState.IsButtonDown(MouseButton.Left) && prevMState.IsButtonUp(MouseButton.Left) && curFrame == -1 && isGameWon == VictoryDirection.None)
             {
                 sCount++;
                 int x = _window.Mouse.X;
@@ -110,7 +118,7 @@ namespace GameSandBox
                     int quadY = y / segH;
                     if(!gState.IsSquareTaken(quadX, quadY))
                     {
-                        gState.TakeSquare(quadX, quadY, curPlayer);
+                        isGameWon = gState.TakeSquare(quadX, quadY, curPlayer);
                         animX = (segW * quadX) + (segW / 2);
                         animY = (segH * quadY) + (segH / 2);
                         curFrame = 0;
@@ -129,7 +137,39 @@ namespace GameSandBox
                 {
                     AddSticker(animX, animY, ref oVList, ref oUList);
                 }
-                curPlayer = (curPlayer + 1) % numPlayers;
+                if (isGameWon != VictoryDirection.None)
+                {
+                    int segW = _window.Width / hQuads;
+                    int segH = _window.Height / vQuads;
+                    int quadX = _window.Mouse.X / segW;
+                    int quadY = _window.Mouse.Y / segH;
+
+                    curVictoryFrame = 0;
+                    if(isGameWon == VictoryDirection.Horizontal)
+                    {
+                        victoryAnimX = 0;
+                        victoryAnimY = (segH * quadY) + (segH / 2);
+                    }
+                    else if(isGameWon == VictoryDirection.Vertical)
+                    {
+                        victoryAnimX = (segW * quadX) + (segW / 2);
+                        victoryAnimY = 0;
+                    }
+                    else if(isGameWon == VictoryDirection.DiagonalTop)
+                    {
+                        victoryAnimX = 0;
+                        victoryAnimY = 0;
+                    }
+                    else if (isGameWon == VictoryDirection.DiagonalBottom)
+                    {
+                        victoryAnimX = 0;
+                        victoryAnimY = _window.Height;
+                    }
+                }
+                else
+                {
+                    curPlayer = (curPlayer + 1) % numPlayers;
+                }
                 curFrame = -1;
             }
 
@@ -171,6 +211,53 @@ namespace GameSandBox
                 GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray.Length), uArray, BufferUsageHint.DynamicDraw);
 
                 curFrame++;
+            }
+
+            if(curVictoryFrame > -1)
+            {
+                int vXOffset, vYOffset;
+                int vX1 = 0, vX2 = 0, vX3= 0, vX4 = 0, vY1 = 0, vY2= 0, vY3=0, vY4=0;
+                if(isGameWon == VictoryDirection.Horizontal)
+                {
+                    vXOffset = curVictoryFrame;
+                    vYOffset = 0;
+                }
+                else if(isGameWon == VictoryDirection.Vertical)
+                {
+                    vXOffset = 0;
+                    vYOffset = curVictoryFrame;
+                    vX1 = vX2 = victoryAnimX - 5;
+                    vX3 = vX4 = victoryAnimX + 5;
+                    vY1 = vY4 = 0;
+                    vY2 = vY3 = curVictoryFrame;
+                }
+                else if(isGameWon == VictoryDirection.DiagonalTop)
+                {
+                    vXOffset = curVictoryFrame;
+                    vYOffset = curVictoryFrame;
+                }
+                else // DiagonalBottom
+                {
+                    vXOffset = curVictoryFrame;
+                    vYOffset = -curVictoryFrame;
+                }
+                Vertex[] animArray = new Vertex[4] {
+                    new Vertex(new Vector2(vX1, vY1), new Vector2(0, 0), Color.Black),
+                    new Vertex(new Vector2(vX2, vY2), new Vector2(1, 0), Color.Black),
+                    new Vertex(new Vector2(vX3, vY3), new Vector2(1, 1), Color.Black),
+                    new Vertex(new Vector2(vX4, vY4), new Vector2(0, 1), Color.Black)
+                };
+                uint[] uArray = new uint[6]{
+                    0, 1, 2,
+                    0, 2, 3
+                };
+
+                GL.BindBuffer(BufferTarget.ArrayBuffer, victoryAnimVBO);
+                GL.BufferData<Vertex>(BufferTarget.ArrayBuffer, (IntPtr)(Vertex.SizeInBytes * animArray.Length), animArray, BufferUsageHint.DynamicDraw);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, victoryAnimIBO);
+                GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray.Length), uArray, BufferUsageHint.DynamicDraw);
+
+                curVictoryFrame++;
             }
         }
 
@@ -299,6 +386,7 @@ namespace GameSandBox
                 GL.ColorPointer(4, ColorPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes * 2);
                 GL.DrawElements(PrimitiveType.Triangles, oUList.Count, DrawElementsType.UnsignedInt, 0);
             }
+            // Draw current snimation
             if(curFrame > -1)
             {
                 if(curPlayer == 0)
@@ -311,6 +399,17 @@ namespace GameSandBox
                 }
                 GL.BindBuffer(BufferTarget.ArrayBuffer, AnimVBO);
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, AnimIBO);
+                GL.VertexPointer(2, VertexPointerType.Float, Vertex.SizeInBytes, 0);
+                GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes);
+                GL.ColorPointer(4, ColorPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes * 2);
+                GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);
+            }
+            // Draw Victory Line
+            if (isGameWon != VictoryDirection.None)
+            {
+                GL.BindTexture(TextureTarget.Texture2D, -1);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, victoryAnimVBO);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, victoryAnimIBO);
                 GL.VertexPointer(2, VertexPointerType.Float, Vertex.SizeInBytes, 0);
                 GL.TexCoordPointer(2, TexCoordPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes);
                 GL.ColorPointer(4, ColorPointerType.Float, Vertex.SizeInBytes, Vector2.SizeInBytes * 2);

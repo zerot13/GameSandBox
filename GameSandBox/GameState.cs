@@ -42,14 +42,14 @@ namespace GameSandBox
             return gameBoard[index] > 0;
         }
 
-        public bool TakeSquare(int x, int y, int curPlayer)
+        public VictoryDirection TakeSquare(int x, int y, int curPlayer)
         {
             int index = hQuads * y + x;
             gameBoard[index] = curPlayer + 1;
             return CheckWin(x, y, curPlayer + 1);
         }
 
-        private bool CheckWin(int x, int y, int curPlayer)
+        private VictoryDirection CheckWin(int x, int y, int curPlayer)
         {
             bool isWin = true;
             // Check vertical win condition
@@ -65,7 +65,7 @@ namespace GameSandBox
             }
             if (isWin)
             {
-                return true;
+                return VictoryDirection.Vertical;
             }
             isWin = true;
             // Then, check horizontal win condition
@@ -81,7 +81,7 @@ namespace GameSandBox
             }
             if (isWin)
             {
-                return true;
+                return VictoryDirection.Horizontal;
             }
             isWin = true;
             // Finally, check diagonal win condition (if possible)
@@ -100,7 +100,7 @@ namespace GameSandBox
                     }
                     if (isWin)
                     {
-                        return true;
+                        return VictoryDirection.DiagonalTop;
                     }
                     isWin = true;
                 }
@@ -118,11 +118,20 @@ namespace GameSandBox
                     }
                     if (isWin)
                     {
-                        return true;
+                        return VictoryDirection.DiagonalBottom;
                     }
                 }
             }
-            return false;
+            return VictoryDirection.None;
         }
+    }
+
+    public enum VictoryDirection
+    {
+        None = 0,
+        Horizontal = 1,
+        Vertical = 2,
+        DiagonalTop = 3,
+        DiagonalBottom = 4
     }
 }
