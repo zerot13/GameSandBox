@@ -7,3 +7,4 @@ bin/
 Debug/
 packages/
 .vs/
+TestResults/
