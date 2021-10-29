@@ -1,14 +1,13 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GameState = GameSandBox.GameState;
+﻿using GameState = GameSandBox.GameState;
 using System.Diagnostics;
+using NUnit.Framework;
 
 namespace GameTest
 {
-    [TestClass]
+    [TestFixture]
     public class GameState3x3Tests
     {
-        [TestMethod]
+        [Test]
         public void Test3x3SquareTaken()
         {
             GameState testState = new GameState(3, 3);
@@ -17,7 +16,7 @@ namespace GameTest
             Debug.Assert(testState.IsSquareTaken(1, 1));
         }
 
-        [TestMethod]
+        [Test]
         public void Test3x3DiagWin()
         {
             GameState testState = new GameState(3, 3);
@@ -26,7 +25,7 @@ namespace GameTest
             //Debug.Assert(testState.TakeSquare(2, 2, 0));
         }
 
-        [TestMethod]
+        [Test]
         public void Test3x3HzWin()
         {
             GameState testState = new GameState(3, 3);
@@ -35,7 +34,7 @@ namespace GameTest
             //Debug.Assert(testState.TakeSquare(2, 0, 0));
         }
 
-        [TestMethod]
+        [Test]
         public void Test3x3VtWin()
         {
             GameState testState = new GameState(3, 3);
@@ -44,10 +43,11 @@ namespace GameTest
             //Debug.Assert(testState.TakeSquare(0, 2, 0));
         }
     }
-    [TestClass]
+    
+    [TestFixture]
     public class GameState5x5Tests
     {
-        [TestMethod]
+        [Test]
         public void Test5x5SquareTaken()
         {
             GameState testState = new GameState(5, 5);
@@ -56,7 +56,7 @@ namespace GameTest
             Debug.Assert(testState.IsSquareTaken(4, 4));
         }
 
-        [TestMethod]
+        [Test]
         public void Test5x5DiagWin()
         {
             GameState testState = new GameState(5, 5);
@@ -67,7 +67,7 @@ namespace GameTest
             //Debug.Assert(testState.TakeSquare(4, 4, 0));
         }
 
-        [TestMethod]
+        [Test]
         public void Test5x5HzWin()
         {
             GameState testState = new GameState(5, 5);
@@ -78,7 +78,7 @@ namespace GameTest
             //Debug.Assert(testState.TakeSquare(4, 0, 0));
         }
 
-        [TestMethod]
+        [Test]
         public void Test5x5VtWin()
         {
             GameState testState = new GameState(5, 5);
