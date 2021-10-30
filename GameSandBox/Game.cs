@@ -31,6 +31,8 @@ namespace GameSandBox
         int curPlayer = 0;
         int victoryAnimX, victoryAnimY;
         int numPlayers;
+        Color vColor;
+        double wRatio;
 
         VictoryDirection isGameWon = VictoryDirection.None;
         int curVictoryFrame = -1;
@@ -45,6 +47,11 @@ namespace GameSandBox
             _window.Load += Window_Load;
             _window.UpdateFrame += Window_UpdateFrame;
             _window.RenderFrame += Window_RenderFrame;
+
+            Random rand = new Random();
+            vColor = Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
+
+            wRatio = (double)_window.Width / _window.Height;
         }
 
         public Game(GameWindow w, int horizontalQuadrants, int verticalQuadrants, int numberOfPlayers)
@@ -57,6 +64,11 @@ namespace GameSandBox
             _window.Load += Window_Load;
             _window.UpdateFrame += Window_UpdateFrame;
             _window.RenderFrame += Window_RenderFrame;
+
+            Random rand = new Random();
+            vColor = Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
+
+            wRatio = (double)_window.Width / _window.Height;
         }
 
         private void Window_Load(object sender, EventArgs e)
@@ -221,6 +233,10 @@ namespace GameSandBox
                 {
                     vXOffset = curVictoryFrame;
                     vYOffset = 0;
+                    vX1 = vX2 = 0;
+                    vX3 = vX4 = curVictoryFrame;
+                    vY1 = vY4 = victoryAnimY - 5;
+                    vY2 = vY3 = victoryAnimY + 5;
                 }
                 else if(isGameWon == VictoryDirection.Vertical)
                 {
@@ -235,17 +251,34 @@ namespace GameSandBox
                 {
                     vXOffset = curVictoryFrame;
                     vYOffset = curVictoryFrame;
+                    vX1 = -5;
+                    vX2 = (int)(curVictoryFrame * wRatio) - 5;
+                    vX3 = (int)(curVictoryFrame * wRatio) + 5;
+                    vX4 = 5;
+                    vY1 = 5;
+                    vY2 = curVictoryFrame + 5;
+                    vY3 = curVictoryFrame - 5;
+                    vY4 = -5;
                 }
                 else // DiagonalBottom
                 {
                     vXOffset = curVictoryFrame;
                     vYOffset = -curVictoryFrame;
+                    vX1 = 5;
+                    vX2 = (int)(curVictoryFrame * wRatio) + 5;
+                    vX3 = (int)(curVictoryFrame * wRatio) - 5;
+                    vX4 = -5;
+                    vY1 = _window.Height + 5;
+                    vY2 = _window.Height - curVictoryFrame + 5;
+                    vY3 = _window.Height - curVictoryFrame - 5;
+                    vY4 = _window.Height - 5;
                 }
+
                 Vertex[] animArray = new Vertex[4] {
-                    new Vertex(new Vector2(vX1, vY1), new Vector2(0, 0), Color.Black),
-                    new Vertex(new Vector2(vX2, vY2), new Vector2(1, 0), Color.Black),
-                    new Vertex(new Vector2(vX3, vY3), new Vector2(1, 1), Color.Black),
-                    new Vertex(new Vector2(vX4, vY4), new Vector2(0, 1), Color.Black)
+                    new Vertex(new Vector2(vX1, vY1), new Vector2(0, 0), vColor),
+                    new Vertex(new Vector2(vX2, vY2), new Vector2(1, 0), vColor),
+                    new Vertex(new Vector2(vX3, vY3), new Vector2(1, 1), vColor),
+                    new Vertex(new Vector2(vX4, vY4), new Vector2(0, 1), vColor)
                 };
                 uint[] uArray = new uint[6]{
                     0, 1, 2,
@@ -257,7 +290,10 @@ namespace GameSandBox
                 GL.BindBuffer(BufferTarget.ElementArrayBuffer, victoryAnimIBO);
                 GL.BufferData<uint>(BufferTarget.ElementArrayBuffer, (IntPtr)(sizeof(uint) * uArray.Length), uArray, BufferUsageHint.DynamicDraw);
 
-                curVictoryFrame++;
+                if(curVictoryFrame < Math.Max(_window.Height, _window.Width))
+                {
+                    curVictoryFrame++;
+                }
             }
         }
 
